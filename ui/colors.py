@@ -1,0 +1,7 @@
+BLUE = "#0000aa"
+DARK_BLUE = "#000080"
+CYAN = "#00aaaa"
+LIGHT_CYAN = "#00ffff"
+WHITE = "#ffffff"
+BLACK = "#000000"
+YELLOW = "#ffff00"
