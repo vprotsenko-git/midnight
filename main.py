@@ -435,37 +435,119 @@ class MiniCommander:
     # ========================================================
 
     def show_jetbrains_dialog(self, title, message, is_input=False, default_val=""):
+
+        WIDTH = 620
+        HEIGHT = 320
+        SHADOW = 8
+
+        # ========================================================
+        # SHADOW WINDOW
+        # ========================================================
+
+        shadow = tk.Toplevel(self.root)
+        shadow.overrideredirect(True)
+        shadow.configure(bg=BLACK)
+
+        # 50% transparent black
+        shadow.attributes("-alpha", 0.5)
+
+        # ========================================================
+        # MAIN DIALOG WINDOW
+        # ========================================================
+
         dialog = tk.Toplevel(self.root)
         dialog.overrideredirect(True)
-        dialog.configure(bg=BLACK)
+        dialog.configure(bg=WHITE)
+
         dialog.grab_set()
 
-        # Повноцінний розмір вікна (не маленьке)
-        dialog.geometry("620x320")
+        # ========================================================
+        # CENTER WINDOWS
+        # ========================================================
 
-        # Зовнішня чорна тінь вікна
-        window_shadow = tk.Frame(dialog, bg=BLACK)
-        window_shadow.pack(fill="both", expand=True, padx=(0, 10), pady=(0, 10))
+        dialog.update_idletasks()
 
-        # Подвійна рамка JetBrains як на другому скріншоті:
-        # Зовнішня товста біла рамка
-        outer_frame = tk.Frame(window_shadow, bg=WHITE, bd=3, relief="solid")
-        outer_frame.pack(fill="both", expand=True)
+        screen_w = dialog.winfo_screenwidth()
+        screen_h = dialog.winfo_screenheight()
 
-        # Тонкий шар між рамками (бірюзовий колір панелі)
-        gap_frame = tk.Frame(outer_frame, bg=CYAN)
-        gap_frame.pack(fill="both", expand=True, padx=2, pady=2)
+        x = (screen_w - WIDTH) // 2
+        y = (screen_h - HEIGHT) // 2
 
-        # Внутрішня біла рамка
-        inner_frame = tk.Frame(gap_frame, bg=WHITE, bd=2, relief="solid")
-        inner_frame.pack(fill="both", expand=True, padx=2, pady=2)
+        # Shadow зміщена вправо + вниз
+        shadow.geometry(
+            f"{WIDTH}x{HEIGHT}+{x + SHADOW}+{y + SHADOW}"
+        )
 
-        # Всередині — бірюзове поле з контентом
-        content_bg = tk.Frame(inner_frame, bg=CYAN)
-        content_bg.pack(fill="both", expand=True, padx=35, pady=30)
+        # Основне вікно
+        dialog.geometry(
+            f"{WIDTH}x{HEIGHT}+{x}+{y}"
+        )
 
-        # Заголовок у чорній плашці по центру на верхній рамці (як на скріншоті Cookie Settings)
-        title_frame = tk.Frame(content_bg, bg=BLACK, bd=1, relief="solid")
+        # Гарантуємо правильний порядок
+        shadow.lower(dialog)
+        dialog.lift()
+
+        # ========================================================
+        # OUTER FRAME
+        # ========================================================
+
+        outer_frame = tk.Frame(
+            dialog,
+            bg=WHITE,
+            bd=2,
+            relief="solid"
+        )
+
+        outer_frame.pack(
+            fill="both",
+            expand=True
+        )
+
+        # ========================================================
+        # INNER BLACK BORDER
+        # ========================================================
+
+        inner_border = tk.Frame(
+            outer_frame,
+            bg=BLACK,
+            bd=1,
+            relief="solid"
+        )
+
+        inner_border.pack(
+            fill="both",
+            expand=True,
+            padx=2,
+            pady=2
+        )
+
+        # ========================================================
+        # CYAN CONTENT
+        # ========================================================
+
+        content_bg = tk.Frame(
+            inner_border,
+            bg=CYAN
+        )
+
+        content_bg.pack(
+            fill="both",
+            expand=True,
+            padx=2,
+            pady=2
+        )
+
+        # ========================================================
+        # TITLE
+        # ========================================================
+
+        title_frame = tk.Frame(
+            content_bg,
+            bg=BLACK,
+            bd=1,
+            relief="solid"
+        )
+
         title_lbl = tk.Label(
             title_frame,
             text=f" {title} ",
@@ -473,10 +555,23 @@ class MiniCommander:
             fg=WHITE,
             font=("Menlo", 11, "bold")
         )
-        title_lbl.pack(padx=6, pady=3)
-        title_frame.place(relx=0.5, rely=0.0, anchor="n", y=-38)
 
-        # Текст повідомлення (великий та зручний)
+        title_lbl.pack(
+            padx=6,
+            pady=2
+        )
+
+        title_frame.place(
+            relx=0.5,
+            rely=0.0,
+            anchor="n",
+            y=-22
+        )
+
+        # ========================================================
+        # MESSAGE
+        # ========================================================
+
         msg_lbl = tk.Label(
             content_bg,
             text=message,
@@ -486,13 +581,39 @@ class MiniCommander:
             anchor="w",
             justify="left"
         )
-        msg_lbl.pack(anchor="w", fill="x", pady=(20, 20))
+
+        msg_lbl.pack(
+            anchor="w",
+            fill="x",
+            padx=35,
+            pady=(45, 20)
+        )
+
+        # ========================================================
+        # RESULT
+        # ========================================================
 
         result = [None]
         entry = None
+
+        # ========================================================
+        # INPUT
+        # ========================================================
+
         if is_input:
-            entry_frame = tk.Frame(content_bg, bg=WHITE, bd=2, relief="solid")
-            entry_frame.pack(fill="x", pady=(0, 20))
+            entry_frame = tk.Frame(
+                content_bg,
+                bg=WHITE,
+                bd=2,
+                relief="solid"
+            )
+
+            entry_frame.pack(
+                fill="x",
+                padx=35,
+                pady=(0, 20)
+            )
+
             entry = tk.Entry(
                 entry_frame,
                 bg=WHITE,
@@ -501,133 +622,61 @@ class MiniCommander:
                 borderwidth=0,
                 highlightthickness=0
             )
-            entry.pack(fill="x", padx=8, pady=8)
+
+            entry.pack(
+                fill="x",
+                padx=8,
+                pady=8
+            )
+
             entry.insert(0, default_val)
             entry.select_range(0, tk.END)
 
-        # Контейнер для кнопок знизу
-        btn_frame = tk.Frame(content_bg, bg=CYAN)
-        btn_frame.pack(anchor="center", pady=(15, 0))
+        # ========================================================
+        # BUTTONS
+        # ========================================================
+
+        btn_frame = tk.Frame(
+            content_bg,
+            bg=CYAN
+        )
+
+        btn_frame.pack(
+            anchor="center",
+            pady=(10, 25)
+        )
 
         def on_ok(event=None):
+
             if is_input:
                 result[0] = entry.get()
             else:
                 result[0] = True
+
+            shadow.destroy()
             dialog.destroy()
 
         def on_cancel(event=None):
+
             result[0] = None
+
+            shadow.destroy()
             dialog.destroy()
 
-        # # Створення оригінальних кнопок з чіткою чорною тіттю праворуч і знизу
-        # def create_jb_button(parent, text, bg_color, command):
-        #
-        #     SHADOW = 6
-        #     WIDTH = 120
-        #     HEIGHT = 34
-        #
-        #     TOTAL_WIDTH = WIDTH + SHADOW
-        #     TOTAL_HEIGHT = HEIGHT + SHADOW
-        #
-        #     # --------------------------------------------------------
-        #     # CANVAS — повністю контролюємо кожен піксель
-        #     # --------------------------------------------------------
-        #
-        #     canvas = tk.Canvas(
-        #         parent,
-        #         width=TOTAL_WIDTH,
-        #         height=TOTAL_HEIGHT,
-        #         bg=CYAN,
-        #         highlightthickness=0,
-        #         borderwidth=0,
-        #         relief="flat"
-        #     )
-        #
-        #     # --------------------------------------------------------
-        #     # ЧОРНА ТІНЬ
-        #     # --------------------------------------------------------
-        #     #
-        #     # Тінь зміщена на 6 px вправо + вниз
-        #     #
-        #     canvas.create_rectangle(
-        #         SHADOW,
-        #         SHADOW,
-        #         SHADOW + WIDTH,
-        #         SHADOW + HEIGHT,
-        #         fill=BLACK,
-        #         outline=BLACK
-        #     )
-        #
-        #     # --------------------------------------------------------
-        #     # ОСНОВНА БІЛА КНОПКА
-        #     # --------------------------------------------------------
-        #
-        #     button_rect = canvas.create_rectangle(
-        #         0,
-        #         0,
-        #         WIDTH,
-        #         HEIGHT,
-        #         fill=bg_color,
-        #         outline=BLACK,
-        #         width=1
-        #     )
-        #
-        #     # --------------------------------------------------------
-        #     # ТЕКСТ
-        #     # --------------------------------------------------------
-        #
-        #     button_text = canvas.create_text(
-        #         WIDTH // 2,
-        #         HEIGHT // 2,
-        #         text=text,
-        #         fill=BLACK,
-        #         font=("Menlo", 11, "bold")
-        #     )
-        #
-        #     # --------------------------------------------------------
-        #     # CLICK
-        #     # --------------------------------------------------------
-        #
-        #     def click(event=None):
-        #         command()
-        #
-        #     canvas.bind("<Button-1>", click)
-        #
-        #     # --------------------------------------------------------
-        #     # HOVER
-        #     # --------------------------------------------------------
-        #
-        #     def enter(event=None):
-        #         canvas.itemconfig(
-        #             button_rect,
-        #             fill="#eeeeee"
-        #         )
-        #
-        #     def leave(event=None):
-        #         canvas.itemconfig(
-        #             button_rect,
-        #             fill=bg_color
-        #         )
-        #
-        #     canvas.bind("<Enter>", enter)
-        #     canvas.bind("<Leave>", leave)
-        #
-        #     return canvas
-
+        # CREATE / YES
         ok_wrapper = self.dialogs.create_jb_button(
             btn_frame,
-            " Create " if is_input else " Yes ",
+            " Yes " if not is_input else " Create ",
             YELLOW,
             on_ok
         )
 
         ok_wrapper.pack(
             side="left",
-            padx=(3, 28),
-            pady=(3, 0)
+            padx=(0, 20)
         )
 
+        # CANCEL
         cancel_wrapper = self.dialogs.create_jb_button(
             btn_frame,
             " Cancel ",
@@ -636,10 +685,12 @@ class MiniCommander:
         )
 
         cancel_wrapper.pack(
-            side="left",
-            padx=(0, 3),
-            pady=(3, 0)
+            side="left"
         )
+
+        # ========================================================
+        # KEYBOARD
+        # ========================================================
 
         if is_input and entry:
             entry.bind("<Return>", on_ok)
@@ -647,17 +698,29 @@ class MiniCommander:
 
         dialog.bind("<Escape>", on_cancel)
 
-        # Центрування вікна на екрані
-        dialog.update_idletasks()
-        w = dialog.winfo_width()
-        h = dialog.winfo_height()
-        x = (dialog.winfo_screenwidth() - w) // 2
-        y = (dialog.winfo_screenheight() - h) // 2
-        dialog.geometry(f"+{x}+{y}")
+        # ========================================================
+        # CLOSE SHADOW IF DIALOG IS CLOSED
+        # ========================================================
+
+        def cleanup(event=None):
+            try:
+                if shadow.winfo_exists():
+                    shadow.destroy()
+            except:
+                pass
+
+        dialog.protocol(
+            "WM_DELETE_WINDOW",
+            on_cancel
+        )
+
+        # ========================================================
+        # WAIT
+        # ========================================================
 
         self.root.wait_window(dialog)
-        return result[0]
 
+        return result[0]
     # ========================================================
     # MENUS DEFINITIONS
     # ========================================================
